@@ -1,0 +1,38 @@
+on:
+  push:
+    branches:
+      - master
+name: Master Build/Deploy
+env:
+  GCLOUD_PROJECT: ${{ secrets.GCLOUD_PROJECT }}
+  GCLOUD_EMAIL: ${{ secrets.GCLOUD_EMAIL }}
+  GITHUB_SHA: ${{ github.sha }}
+  IMAGE: game-server-commander
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '15'
+      - name: Cache local Maven repository
+        uses: actions/cache@v2.1.4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build, Test
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./mvnw clean verify -P git-commit --no-transfer-progress
+      - name: GitHub Docker Action
+        uses: matootie/github-docker@v3.1.0
+        with:
+          accessToken: ${{ secrets.GITHUB_PACKAGE_ACTIONS }}
+          tag: |
+            latest
+            ${{ github.sha }}
+          containerRegistry: true

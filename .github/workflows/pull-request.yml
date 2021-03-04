@@ -1,0 +1,24 @@
+on: pull_request
+name: PR Build
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '15'
+      - name: Cache local Maven repository
+        uses: actions/cache@v2.1.4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Package
+        run: ./mvnw clean verify -P git-commit,integration --no-transfer-progress
+      - name: GitHub Docker Action
+        uses: matootie/github-docker@v3.1.0
+        with:
+          accessToken: ${{ secrets.GITHUB_PACKAGE_ACTIONS }}
