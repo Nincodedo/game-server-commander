@@ -1,7 +1,5 @@
 package dev.nincodedo.ocwgameservercommander;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.model.Container;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -10,19 +8,15 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-
 @Component
 public class GameServerCommand {
 
-    public static final String GSC_GAME_NAME_KEY = "dev.nincodedo.gameservercommander.name";
-    public static final String GCS_GROUP_KEY = "dev.nincodedo.gameservercommander.group";
     private final GameServerRepository gameServerRepository;
-    private final DockerClient dockerClient;
+    private final GameServerManager gameServerManager;
 
-    public GameServerCommand(GameServerRepository gameServerRepository, DockerClient dockerClient) {
+    public GameServerCommand(GameServerManager gameServerManager, GameServerRepository gameServerRepository) {
         this.gameServerRepository = gameServerRepository;
-        this.dockerClient = dockerClient;
+        this.gameServerManager = gameServerManager;
     }
 
 
@@ -45,30 +39,10 @@ public class GameServerCommand {
         event.deferReply().queue();
         var gameServer = gameServerRepository.findGameServerByName(gameOption.getAsString());
         if (!gameServer.isOnline()) {
-            var allContainers = dockerClient.listContainersCmd()
-                    .withShowAll(true)
-                    .exec()
-                    .stream()
-                    .filter(container -> gameServer.getName().equalsIgnoreCase(container.getLabels().get(GSC_GAME_NAME_KEY)))
-                    .toList();
-            if (allContainers.size() == 1) {
-                var gameContainer = allContainers.get(0);
-                var containerList = new ArrayList<Container>();
-                if (gameContainer.getLabels().containsKey(GCS_GROUP_KEY)) {
-                    var groupName = gameContainer.getLabels().get(GCS_GROUP_KEY);
-                    containerList.addAll(dockerClient.listContainersCmd().withShowAll(true).exec().stream()
-                            .filter(container -> groupName.equalsIgnoreCase(container.getLabels().get(GCS_GROUP_KEY)))
-                            .toList());
-                } else {
-                    containerList.add(gameContainer);
-                }
-                containerList.stream().filter(container -> container.getState().equals("exited")).forEach(container -> dockerClient.startContainerCmd(container.getId()).exec());
-                event.getHook().editOriginal("Starting " + gameServer.getName()).queue();
-            } else if (allContainers.isEmpty()) {
-                event.getHook().editOriginal("Game server not found. Contact Nin.").queue();
-            } else {
-                event.getHook().editOriginal("Multiple games found???").queue();
-            }
+            gameServerManager.startGameServer(gameServer);
+            event.getHook().editOriginalFormat("Starting %s", gameServer.getName()).queue();
+        } else {
+            event.getHook().editOriginalFormat("%s is already started.", gameServer.getName()).queue();
         }
     }
 
@@ -83,8 +57,8 @@ public class GameServerCommand {
         var gameServer = gameServerRepository.findGameServerByName(game);
         var ninPrivateMessageChannel = event.getJDA().openPrivateChannelById("86958766125244416").complete();
 
-        ninPrivateMessageChannel.sendMessage(String.format("Game server %s is reported as broken by %s",
-                        gameServer.getName(), event.getUser().getName()))
+        ninPrivateMessageChannel.sendMessageFormat("Game server %s is reported as broken by %s",
+                        gameServer.getName(), event.getUser().getName())
                 .setActionRow(Button.danger(String.format("gsc-restart-%s", gameServer.getId()), String.format("Restart %s?", gameServer.getName())),
                         Button.secondary("gsc-ignore", "Disable fix alerts"))
                 .queue();
