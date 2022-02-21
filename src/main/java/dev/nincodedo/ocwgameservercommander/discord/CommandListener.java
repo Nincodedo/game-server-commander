@@ -1,4 +1,4 @@
-package dev.nincodedo.ocwgameservercommander;
+package dev.nincodedo.ocwgameservercommander.discord;
 
 import io.micrometer.core.instrument.util.NamedThreadFactory;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;

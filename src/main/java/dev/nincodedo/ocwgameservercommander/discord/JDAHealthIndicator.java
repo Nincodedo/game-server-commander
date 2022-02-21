@@ -1,4 +1,4 @@
-package dev.nincodedo.ocwgameservercommander;
+package dev.nincodedo.ocwgameservercommander.discord;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.sharding.ShardManager;

@@ -1,44 +1,43 @@
 package dev.nincodedo.ocwgameservercommander;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
+@Slf4j
 @Component
 public class GameServerManager {
     private final GameServerService gameServerService;
-    private final DockerClient dockerClient;
+    private final CommonContainerUtil commonContainerUtil;
+    @Getter
+    @Setter
+    private boolean recentChangesMade = false;
     public static final String GSC_GAME_NAME_KEY = "dev.nincodedo.gameservercommander.name";
-    public static final String GCS_GROUP_KEY = "dev.nincodedo.gameservercommander.group";
 
-    public GameServerManager(GameServerService gameServerService, DockerClient dockerClient) {
+    public GameServerManager(GameServerService gameServerService, CommonContainerUtil commonContainerUtil) {
         this.gameServerService = gameServerService;
-        this.dockerClient = dockerClient;
+        this.commonContainerUtil = commonContainerUtil;
     }
 
     public void startGameServer(GameServer gameServer) {
-        var allContainers = dockerClient.listContainersCmd()
-                .withShowAll(true)
-                .exec()
-                .stream()
-                .filter(container -> gameServer.getName().equalsIgnoreCase(container.getLabels().get(GSC_GAME_NAME_KEY)))
-                .toList();
-        if (allContainers.size() == 1) {
-            var gameContainer = allContainers.get(0);
-            var containerList = new ArrayList<Container>();
-            if (gameContainer.getLabels().containsKey(GCS_GROUP_KEY)) {
-                var groupName = gameContainer.getLabels().get(GCS_GROUP_KEY);
-                containerList.addAll(dockerClient.listContainersCmd().withShowAll(true).exec().stream()
-                        .filter(container -> groupName.equalsIgnoreCase(container.getLabels().get(GCS_GROUP_KEY)))
-                        .toList());
-            } else {
-                containerList.add(gameContainer);
-            }
-            containerList.stream().filter(container -> container.getState().equals("exited")).forEach(container -> dockerClient.startContainerCmd(container.getId()).exec());
-            gameServer.setOnline(true);
-            gameServerService.save(gameServer);
-        }
+        log.trace("Attempting to start {}", gameServer);
+        var gameContainers = commonContainerUtil.getGameContainerByName(gameServer.getName());
+        log.trace("Found {} game container(s)", gameContainers.size());
+        commonContainerUtil.startContainers(gameContainers);
+        gameServer.setOnline(true);
+        gameServerService.save(gameServer);
+        recentChangesMade = true;
+    }
+
+    public int getOnlineGameServerCount() {
+        return gameServerService.getOnlineGameServerCount();
+    }
+
+    public void restartGameServer(GameServer gameServer) {
+
     }
 }

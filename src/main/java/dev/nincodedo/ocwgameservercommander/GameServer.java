@@ -2,12 +2,17 @@ package dev.nincodedo.ocwgameservercommander;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -25,6 +30,14 @@ public class GameServer {
     private String connectionInfo;
     private boolean online;
     private String containerId;
+    @CreatedBy
+    private String createdBy;
+    @CreatedDate
+    private LocalDateTime createdDateTime;
+    @LastModifiedBy
+    private String modifiedBy;
+    @LastModifiedDate
+    private LocalDateTime modifiedDateTime;
 
     public String getGameDescription() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -33,11 +46,7 @@ public class GameServer {
             stringBuilder.append("\nServer: ");
             stringBuilder.append(connectionInfo);
         }
-        if (online) {
-            stringBuilder.append("\nOnline");
-        } else {
-            stringBuilder.append("\nOffline");
-        }
+        stringBuilder.append(online ? "\n🔛 Online" : "\n📴 Offline");
         return stringBuilder.toString();
     }
 

@@ -21,11 +21,11 @@ import javax.security.auth.login.LoginException;
 @Configuration
 public class AppConfiguration {
     private final String discordToken;
-    private final String localIp;
+    private final String dockerHost;
 
-    public AppConfiguration(@Value("${discordToken}") String discordToken, @Value("${localIp}") String localIp) {
+    public AppConfiguration(@Value("${discordToken}") String discordToken, @Value("${dockerHost}") String dockerHost) {
         this.discordToken = discordToken;
-        this.localIp = localIp;
+        this.dockerHost = dockerHost;
     }
 
     @Bean
@@ -45,7 +45,7 @@ public class AppConfiguration {
     public DockerClientConfig dockerClientConfig() {
         return DefaultDockerClientConfig
                 .createDefaultConfigBuilder()
-                .withDockerHost("tcp://"+localIp+":2375")
+                .withDockerHost(dockerHost)
                 .build();
     }
 
