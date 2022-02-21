@@ -1,4 +1,4 @@
-package dev.nincodedo.ocwgameservercommander;
+package dev.nincodedo.ocwgameservercommander.config;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -6,6 +6,8 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import dev.nincodedo.ocwgameservercommander.discord.CommandListener;
+import dev.nincodedo.ocwgameservercommander.discord.CommandRegistration;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -19,9 +21,11 @@ import javax.security.auth.login.LoginException;
 @Configuration
 public class AppConfiguration {
     private final String discordToken;
+    private final String localIp;
 
-    public AppConfiguration(@Value("${discordToken}") String discordToken) {
+    public AppConfiguration(@Value("${discordToken}") String discordToken, @Value("${localIp}") String localIp) {
         this.discordToken = discordToken;
+        this.localIp = localIp;
     }
 
     @Bean
@@ -41,7 +45,7 @@ public class AppConfiguration {
     public DockerClientConfig dockerClientConfig() {
         return DefaultDockerClientConfig
                 .createDefaultConfigBuilder()
-                .withDockerHost("tcp://localhost:2375")
+                .withDockerHost("tcp://"+localIp+":2375")
                 .build();
     }
 
