@@ -30,7 +30,6 @@ public class GameServerManager {
         commonContainerUtil.startContainers(gameContainers);
         gameServer.setOnline(true);
         gameServerService.save(gameServer);
-        recentChangesMade = true;
     }
 
     public int getOnlineGameServerCount() {
