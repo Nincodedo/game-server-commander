@@ -2,10 +2,8 @@ package dev.nincodedo.ocwgameservercommander.config;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
-import com.github.dockerjava.transport.DockerHttpClient;
 import dev.nincodedo.ocwgameservercommander.discord.CommandListener;
 import dev.nincodedo.ocwgameservercommander.discord.CommandRegistration;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +29,7 @@ public class AppConfiguration {
     @Bean
     public ShardManager shardManager(CommandListener commandListener, CommandRegistration commandRegistration) {
         try {
-            return DefaultShardManagerBuilder.createDefault(discordToken)
+            return DefaultShardManagerBuilder.createLight(discordToken)
                     .addEventListeners(commandListener, commandRegistration)
                     .setShardsTotal(-1)
                     .build();
@@ -42,22 +40,14 @@ public class AppConfiguration {
     }
 
     @Bean
-    public DockerClientConfig dockerClientConfig() {
-        return DefaultDockerClientConfig
+    public DockerClient dockerClient() {
+        var config = DefaultDockerClientConfig
                 .createDefaultConfigBuilder()
                 .withDockerHost(dockerHost)
                 .build();
-    }
-
-    @Bean
-    public DockerHttpClient dockerHttpClient(DockerClientConfig dockerClientConfig) {
-        return new ApacheDockerHttpClient.Builder().dockerHost(dockerClientConfig.getDockerHost())
-                .sslConfig(dockerClientConfig.getSSLConfig())
+        var client = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
+                .sslConfig(config.getSSLConfig())
                 .build();
-    }
-
-    @Bean
-    public DockerClient dockerClient(DockerClientConfig config, DockerHttpClient client) {
         return DockerClientImpl.getInstance(config, client);
     }
 }
