@@ -37,6 +37,4 @@ public class GameServerStatusChecker {
         }
         return true;
     }
-
-
 }

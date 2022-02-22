@@ -20,7 +20,11 @@ public class CommandRegistration extends ListenerAdapter {
         if (event.getJDA().getShardManager() == null) {
             return;
         }
-        event.getJDA().getShardManager().getGuilds().stream().filter(guild -> guild.getOwnerId().equals(new Constants().getNincodedoUserId()))
+        event.getJDA()
+                .getShardManager()
+                .getGuilds()
+                .stream()
+                .filter(guild -> guild.getOwnerId().equals(new Constants().getNincodedoUserId()))
                 .forEach(guild -> {
                     var gameServerCommandData = Commands.slash("games", "Main game server command.")
                             .addSubcommands(List.of(
@@ -32,7 +36,8 @@ public class CommandRegistration extends ListenerAdapter {
                             )).setDefaultEnabled(false);
                     var gameServerCommand = guild.upsertCommand(gameServerCommandData).complete();
                     guild.getRolesByName("ocw", true).forEach(role ->
-                            guild.updateCommandPrivilegesById(gameServerCommand.getId(), CommandPrivilege.enable(role)).queue());
+                            guild.updateCommandPrivilegesById(gameServerCommand.getId(), CommandPrivilege.enable(role))
+                                    .queue());
                 });
     }
 }
