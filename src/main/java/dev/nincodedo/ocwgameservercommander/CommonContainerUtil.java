@@ -58,4 +58,24 @@ public class CommonContainerUtil {
                     startContainer(container);
                 });
     }
+
+    public void stopContainers(List<Container> gameContainers) {
+        gameContainers.stream().filter(container -> !container.getState().equals("exited"))
+                .forEach(container -> {
+                    log.trace("Stopping container {}", container.getId());
+                    stopContainer(container);
+                });
+    }
+
+    public void stopContainer(Container container) {
+        dockerClient.stopContainerCmd(container.getId()).exec();
+    }
+
+    public String getLogsForContainers(List<Container> gameContainers) {
+
+
+        dockerClient.logContainerCmd(gameContainers.get(0).getId()).start();
+
+        return null;
+    }
 }
