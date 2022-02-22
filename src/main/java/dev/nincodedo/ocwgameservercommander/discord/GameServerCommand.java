@@ -71,8 +71,11 @@ public class GameServerCommand {
         event.reply("Nincodedo has been notified and will look into the issue ASAP.").setEphemeral(true).queue();
         gameServerService.findGameServerByName(game).ifPresentOrElse(gameServer -> {
             event.getJDA().openPrivateChannelById(constants.getNincodedoUserId()).complete()
-                    .sendMessageFormat("Game server %s is reported as broken by %s.", gameServer.getName(), event.getUser().getName())
-                    .setActionRow(Button.danger(String.format("gsc-restart-%s", gameServer.getId()), String.format("Restart %s?", gameServer.getName())),
+                    .sendMessageFormat("Game server %s is reported as broken by %s.", gameServer.getName(), event.getUser()
+                            .getName())
+                    .setActionRow(
+                            Button.danger(String.format("gsc-restart-%s", gameServer.getId()), String.format("Restart %s?", gameServer.getName())),
+                            Button.danger(String.format("gsc-stop-%s", gameServer.getId()), String.format("Stop %s?", gameServer.getName())),
                             Button.secondary("gsc-ignore", "Disable fix alerts"))
                     .queue();
         }, replyGameServerNotFound(event, gameOption.getAsString()));
@@ -105,15 +108,25 @@ public class GameServerCommand {
 
     public void executeButtonPress(ButtonInteractionEvent event, String buttonId) {
         var buttonAction = getButtonAction(buttonId);
-        if (buttonAction.actionName().equals("restart")) {
-            event.deferEdit().queue();
-            gameServerService.findById(Long.valueOf(buttonAction.value())).ifPresentOrElse(gameServer -> {
-                event.editButton(event.getButton().asDisabled().withLabel("Restarting...")).queue();
-                gameServerManager.restartGameServer(gameServer);
-            }, () -> event.editButton(event.getButton().withLabel("Failed to restart")).queue());
-        } else if (buttonAction.actionName().equals("ignore")) {
-            //TODO add disable alert option for u
-            event.deferEdit().queue();
+        switch (buttonAction.actionName()) {
+            case "restart" -> {
+                event.deferEdit().queue();
+                gameServerService.findById(Long.valueOf(buttonAction.value())).ifPresentOrElse(gameServer -> {
+                    event.editButton(event.getButton().asDisabled().withLabel("Restarting...")).queue();
+                    gameServerManager.restartGameServer(gameServer);
+                }, () -> event.editButton(event.getButton().withLabel("Failed to restart")).queue());
+            }
+            case "stop" -> {
+                event.deferEdit().queue();
+                gameServerService.findById(Long.valueOf(buttonAction.value())).ifPresentOrElse(gameServer -> {
+                    event.editButton(event.getButton().asDisabled().withLabel("Stopping...")).queue();
+                    gameServerManager.stopGameServer(gameServer);
+                }, () -> event.editButton(event.getButton().withLabel("Failed to stop")).queue());
+            }
+            case "ignore" ->
+                //TODO add disable alert option for u
+                    event.deferEdit().queue();
+            default -> event.reply("???").queue();
         }
     }
 

@@ -26,7 +26,9 @@ public class JDAHealthIndicator implements HealthIndicator {
         if (totalShardCount == connectedShardsCount) {
             return Health.up().build();
         } else if (connectedShardsCount > 0) {
-            return Health.up().status(new Status("Partial service", String.format("%s of %s shards connected", connectedShardsCount, totalShardCount))).build();
+            return Health.up()
+                    .status(new Status("Partial service", String.format("%s of %s shards connected", connectedShardsCount, totalShardCount)))
+                    .build();
         } else {
             return Health.down().build();
         }

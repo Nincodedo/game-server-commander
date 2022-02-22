@@ -25,7 +25,8 @@ public class CommonContainerUtil {
                 .withShowAll(true)
                 .exec()
                 .stream()
-                .filter(container -> gameServerName.equalsIgnoreCase(container.getLabels().get(GameServerManager.GSC_GAME_NAME_KEY)))
+                .filter(container -> gameServerName.equalsIgnoreCase(container.getLabels()
+                        .get(GameServerManager.GSC_GAME_NAME_KEY)))
                 .toList().get(0);
         var containerList = new ArrayList<Container>();
         if (gameContainer.getLabels().containsKey(GCS_GROUP_KEY)) {
