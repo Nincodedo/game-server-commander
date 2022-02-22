@@ -1,6 +1,10 @@
 on:
   push:
+    paths-ignore:
+      - "**.md"
   pull_request:
+    paths-ignore:
+      - "**.md"
 name: Build & Test
 env:
   GITHUB_SHA: ${{ github.sha }}
