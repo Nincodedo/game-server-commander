@@ -15,6 +15,12 @@ import java.util.List;
 @Component
 public class CommandRegistration extends ListenerAdapter {
 
+    private final Constants constants;
+
+    public CommandRegistration(Constants constants){
+        this.constants = constants;
+    }
+
     @Override
     public void onReady(@NotNull ReadyEvent event) {
         if (event.getJDA().getShardManager() == null) {
@@ -24,7 +30,7 @@ public class CommandRegistration extends ListenerAdapter {
                 .getShardManager()
                 .getGuilds()
                 .stream()
-                .filter(guild -> guild.getOwnerId().equals(new Constants().getNincodedoUserId()))
+                .filter(guild -> guild.getOwnerId().equals(constants.getNincodedoUserId()))
                 .forEach(guild -> {
                     var gameServerCommandData = Commands.slash("games", "Main game server command.")
                             .addSubcommands(List.of(

@@ -18,11 +18,12 @@ public class GameServerCommand {
 
     private final GameServerService gameServerService;
     private final GameServerManager gameServerManager;
-    private final Constants constants = new Constants();
+    private final Constants constants;
 
-    public GameServerCommand(GameServerManager gameServerManager, GameServerService gameServerService) {
+    public GameServerCommand(GameServerManager gameServerManager, GameServerService gameServerService, Constants constants) {
         this.gameServerService = gameServerService;
         this.gameServerManager = gameServerManager;
+        this.constants = constants;
     }
 
 

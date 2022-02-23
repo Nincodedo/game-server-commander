@@ -1,4 +1,4 @@
-package dev.nincodedo.ocwgameservercommander;
+package dev.nincodedo.ocwgameservercommander.common;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
@@ -11,12 +11,15 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class CommonContainerUtil {
+public class ContainerUtil {
     public static final String GCS_GROUP_KEY = "dev.nincodedo.gameservercommander.group";
+    public static final String GSC_NAME_KEY = "dev.nincodedo.gameservercommander.name";
+    public static final String GSC_GAME_KEY = "dev.nincodedo.gameservercommander.game";
+    public static final String GSC_DESCRIPTION_KEY = "dev.nincodedo.gameservercommander.description";
 
     private final DockerClient dockerClient;
 
-    public CommonContainerUtil(DockerClient dockerClient) {
+    public ContainerUtil(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
     }
 
@@ -26,7 +29,7 @@ public class CommonContainerUtil {
                 .exec()
                 .stream()
                 .filter(container -> gameServerName.equalsIgnoreCase(container.getLabels()
-                        .get(GameServerManager.GSC_GAME_NAME_KEY)))
+                        .get(GSC_NAME_KEY)))
                 .toList().get(0);
         var containerList = new ArrayList<Container>();
         if (gameContainer.getLabels().containsKey(GCS_GROUP_KEY)) {
@@ -44,6 +47,15 @@ public class CommonContainerUtil {
 
     public List<Container> getAllContainers() {
         return dockerClient.listContainersCmd().withShowAll(true).exec();
+    }
+
+    public List<Container> getAllGameServerContainers() {
+        return dockerClient.listContainersCmd()
+                .withShowAll(true)
+                .exec()
+                .stream()
+                .filter(container -> container.getLabels().containsKey(GSC_NAME_KEY))
+                .toList();
     }
 
     public void startContainer(Container container) {
@@ -77,5 +89,15 @@ public class CommonContainerUtil {
         dockerClient.logContainerCmd(gameContainers.get(0).getId()).start();
 
         return null;
+    }
+
+    public Container getMainGameContainerByName(String gameName) {
+        return dockerClient.listContainersCmd()
+                .withShowAll(true)
+                .exec()
+                .stream()
+                .filter(container -> gameName.equalsIgnoreCase(container.getLabels()
+                        .get(GSC_NAME_KEY)))
+                .toList().get(0);
     }
 }

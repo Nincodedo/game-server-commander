@@ -1,5 +1,6 @@
 package dev.nincodedo.ocwgameservercommander;
 
+import dev.nincodedo.ocwgameservercommander.common.ContainerUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -8,39 +9,38 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class GameServerManager {
-    public static final String GSC_GAME_NAME_KEY = "dev.nincodedo.gameservercommander.name";
     private final GameServerService gameServerService;
-    private final CommonContainerUtil commonContainerUtil;
+    private final ContainerUtil containerUtil;
     @Getter
     @Setter
     private boolean recentChangesMade = false;
 
-    public GameServerManager(GameServerService gameServerService, CommonContainerUtil commonContainerUtil) {
+    public GameServerManager(GameServerService gameServerService, ContainerUtil containerUtil) {
         this.gameServerService = gameServerService;
-        this.commonContainerUtil = commonContainerUtil;
+        this.containerUtil = containerUtil;
     }
 
     public void startGameServer(GameServer gameServer) {
         log.trace("Attempting to start {}", gameServer);
-        var gameContainers = commonContainerUtil.getGameContainerByName(gameServer.getName());
+        var gameContainers = containerUtil.getGameContainerByName(gameServer.getName());
         log.trace("Found {} game container(s)", gameContainers.size());
-        commonContainerUtil.startContainers(gameContainers);
+        containerUtil.startContainers(gameContainers);
         gameServer.setOnline(true);
         gameServerService.save(gameServer);
     }
 
     public void stopGameServer(GameServer gameServer) {
         log.trace("Attempting to stop {}", gameServer);
-        var gameContainers = commonContainerUtil.getGameContainerByName(gameServer.getName());
+        var gameContainers = containerUtil.getGameContainerByName(gameServer.getName());
         log.trace("Found {} game container(s)", gameContainers.size());
-        commonContainerUtil.stopContainers(gameContainers);
+        containerUtil.stopContainers(gameContainers);
         gameServer.setOnline(false);
         gameServerService.save(gameServer);
     }
 
     public String getGameServerLogs(GameServer gameServer) {
-        var gameContainers = commonContainerUtil.getGameContainerByName(gameServer.getName());
-        return commonContainerUtil.getLogsForContainers(gameContainers);
+        var gameContainers = containerUtil.getGameContainerByName(gameServer.getName());
+        return containerUtil.getLogsForContainers(gameContainers);
     }
 
     public void restartGameServer(GameServer gameServer) {
