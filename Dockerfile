@@ -11,7 +11,7 @@ FROM openjdk:17-jdk-slim-buster
 LABEL maintainer="Nincodedo"
 
 RUN mkdir /app
-RUN groupadd -r gsc && useradd -r -s /bin/false -g gsc gsc
+RUN groupadd -g 1000 -r gsc && useradd -r -s /bin/false -u 1000 -g gsc gsc
 WORKDIR /app
 COPY --chown=gsc:gsc --from=build target/ocw-game-server-commander*.jar /app/gsc.jar
 RUN apt-get update && apt-get install curl -y --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
