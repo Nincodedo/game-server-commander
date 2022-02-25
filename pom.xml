@@ -16,7 +16,7 @@
     <properties>
         <java.version>17</java.version>
         <docker-java.version>3.2.13</docker-java.version>
-        <JDA.version>5.0.0-alpha.8</JDA.version>
+        <JDA.version>5.0.0-alpha.9</JDA.version>
     </properties>
     <dependencies>
         <dependency>
