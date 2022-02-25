@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,7 +24,6 @@ public class GameServerCommand {
         this.gameServerManager = gameServerManager;
         this.constants = constants;
     }
-
 
     public void executeSlashCommand(SlashCommandInteractionEvent event) {
         if ("start".equals(event.getSubcommandName())) {
@@ -44,22 +42,17 @@ public class GameServerCommand {
             return;
         }
         event.deferReply().queue();
-        var optionalGameServer = gameServerService.findGameServerByName(gameOption.getAsString());
-        optionalGameServer.ifPresentOrElse(gameServer -> {
-            if (!gameServer.isOnline()) {
-                gameServerManager.startGameServer(gameServer);
-                event.getHook().editOriginalFormat("Starting %s...", gameServer.getName()).queue();
-
-            } else {
-                event.getHook().editOriginalFormat("%s is already started. If you think this server may be broken, " +
-                        "use '/games fix' to notify Nincodedo.", gameServer.getName()).queue();
-            }
-        }, replyGameServerNotFound(event, gameOption.getAsString()));
-    }
-
-    @NotNull
-    private Runnable replyGameServerNotFound(SlashCommandInteractionEvent event, String gameServerName) {
-        return () -> event.getHook().editOriginalFormat("Could not find server named %s.", gameServerName).queue();
+        var gameServerName = gameOption.getAsString();
+        var result = gameServerManager.startGameServer(gameServerName);
+        switch (result) {
+            case STARTING -> event.getHook().editOriginalFormat("Starting %s...", gameServerName).queue();
+            case ALREADY_STARTED -> event.getHook()
+                    .editOriginalFormat("%s is already started. If you think this server may be broken, use '/games fix' to notify Nincodedo.", gameServerName)
+                    .queue();
+            case NOT_FOUND ->
+                    event.getHook().editOriginalFormat("Could not find server named %s.", gameServerName).queue();
+            default -> throw new IllegalStateException("Unexpected value: " + result);
+        }
     }
 
     private void fixGameServer(SlashCommandInteractionEvent event) {
@@ -71,7 +64,7 @@ public class GameServerCommand {
         var game = gameOption.getAsString();
         event.reply("Nincodedo has been notified and will look into the issue ASAP.").setEphemeral(true).queue();
         gameServerService.findGameServerByName(game).ifPresentOrElse(gameServer -> {
-            event.getJDA().openPrivateChannelById(constants.getNincodedoUserId()).complete()
+            event.getJDA().openPrivateChannelById(constants.nincodedoUserId()).complete()
                     .sendMessageFormat("Game server %s is reported as broken by %s.", gameServer.getName(), event.getUser()
                             .getName())
                     .setActionRow(
@@ -79,7 +72,9 @@ public class GameServerCommand {
                             Button.danger(String.format("gsc-stop-%s", gameServer.getId()), String.format("Stop %s?", gameServer.getName())),
                             Button.secondary("gsc-ignore", "Disable fix alerts"))
                     .queue();
-        }, replyGameServerNotFound(event, gameOption.getAsString()));
+        }, () -> event.getHook()
+                .editOriginalFormat("Could not find server named %s.", gameOption.getAsString())
+                .queue());
     }
 
     private void listGameServers(SlashCommandInteractionEvent event) {
@@ -124,9 +119,8 @@ public class GameServerCommand {
                     gameServerManager.stopGameServer(gameServer);
                 }, () -> event.editButton(event.getButton().withLabel("Failed to stop")).queue());
             }
-            case "ignore" ->
-                //TODO add disable alert option for u
-                    event.deferEdit().queue();
+            //TODO add disable alert option for u
+            case "ignore" -> event.deferEdit().queue();
             default -> event.reply("???").queue();
         }
     }
@@ -137,5 +131,8 @@ public class GameServerCommand {
         String actionName = button.length >= 2 ? button[1] : null;
         String value = button.length >= 3 ? button[2] : null;
         return new ButtonAction(prefix, actionName, value);
+    }
+
+    public record ButtonAction(String prefix, String actionName, String value) {
     }
 }

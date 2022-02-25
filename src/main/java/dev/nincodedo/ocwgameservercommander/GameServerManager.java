@@ -20,13 +20,30 @@ public class GameServerManager {
         this.containerUtil = containerUtil;
     }
 
-    public void startGameServer(GameServer gameServer) {
+    public StartServerResult startGameServer(String gameServerName) {
+        var optionalGameServer = gameServerService.findGameServerByName(gameServerName);
+        if (optionalGameServer.isPresent()) {
+            var gameServer = optionalGameServer.get();
+            if (!gameServer.isOnline()) {
+                startGameServer(gameServer);
+                return StartServerResult.STARTING;
+            } else {
+                return StartServerResult.ALREADY_STARTED;
+            }
+        } else {
+            return StartServerResult.NOT_FOUND;
+        }
+    }
+
+    private void startGameServer(GameServer gameServer) {
         log.trace("Attempting to start {}", gameServer);
         var gameContainers = containerUtil.getGameContainerByName(gameServer.getName());
         log.trace("Found {} game container(s)", gameContainers.size());
-        containerUtil.startContainers(gameContainers);
-        gameServer.setOnline(true);
-        gameServerService.save(gameServer);
+        if (!gameContainers.isEmpty()) {
+            containerUtil.startContainers(gameContainers);
+            gameServer.setOnline(true);
+            gameServerService.save(gameServer);
+        }
     }
 
     public void stopGameServer(GameServer gameServer) {

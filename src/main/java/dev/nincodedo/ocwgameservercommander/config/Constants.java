@@ -5,12 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Constants {
+public record Constants(@Getter String nincodedoUserId) {
 
-    public Constants(@Value("${nincodedoUserId}") String nincodedoUserId){
+    public Constants(@Value("${nincodedoUserId}") String nincodedoUserId) {
         this.nincodedoUserId = nincodedoUserId;
     }
-
-    @Getter
-    private String nincodedoUserId;
 }
