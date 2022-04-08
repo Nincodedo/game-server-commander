@@ -6,6 +6,11 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 @Slf4j
 @Component
 public class GameServerManager {
@@ -61,6 +66,29 @@ public class GameServerManager {
     }
 
     public void restartGameServer(GameServer gameServer) {
+        //TODO ^
+    }
 
+    public boolean waitForGameServerStart(String gameServerName) {
+        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+            while (true) {
+                var status = containerUtil.getMainGameContainerByName(gameServerName).getStatus().toLowerCase();
+                if(status.contains("healthy") || (!status.contains("health:") && status.contains("up"))) {
+                    return true;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        try {
+            return future.get(5, TimeUnit.MINUTES);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.error("Failed to wait for server", e);
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 }

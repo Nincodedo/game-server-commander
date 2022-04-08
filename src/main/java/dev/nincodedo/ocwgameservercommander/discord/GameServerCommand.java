@@ -45,7 +45,17 @@ public class GameServerCommand {
         var gameServerName = gameOption.getAsString();
         var result = gameServerManager.startGameServer(gameServerName);
         switch (result) {
-            case STARTING -> event.getHook().editOriginalFormat("Starting %s...", gameServerName).queue();
+            case STARTING -> event.getHook().editOriginalFormat("Starting %s...", gameServerName).queue(message -> {
+                var started = gameServerManager.waitForGameServerStart(gameServerName);
+                if (started) {
+                    message.editMessageFormat("%s has started.", gameServerName).queue();
+                    message.addReaction("\u2705").queue();
+                } else {
+                    message.editMessageFormat("%s failed to start. Use '/games fix' to notify Nincodedo.", gameServerName)
+                            .queue();
+                    message.addReaction("\u274C").queue();
+                }
+            });
             case ALREADY_STARTED -> event.getHook()
                     .editOriginalFormat("%s is already started. If you think this server may be broken, use '/games fix' to notify Nincodedo.", gameServerName)
                     .queue();
