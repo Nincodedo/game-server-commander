@@ -27,7 +27,7 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build & Test
         run: ./mvnw clean verify --no-transfer-progress
-      - uses: docker/setup-buildx-action@v1
+      - uses: docker/setup-buildx-action@v2
         id: buildx
         with:
           install: true
