@@ -1,6 +1,7 @@
 package dev.nincodedo.ocwgameservercommander.discord;
 
 import dev.nincodedo.ocwgameservercommander.config.Constants;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -11,13 +12,15 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Component
 public class CommandRegistration extends ListenerAdapter {
 
     private final Constants constants;
 
-    public CommandRegistration(Constants constants){
+    public CommandRegistration(Constants constants) {
         this.constants = constants;
     }
 
@@ -41,9 +44,14 @@ public class CommandRegistration extends ListenerAdapter {
                                             .addOption(OptionType.STRING, "game", "Name of the game server that needs fixing.", true, true)
                             )).setDefaultEnabled(false);
                     var gameServerCommand = guild.upsertCommand(gameServerCommandData).complete();
-                    guild.getRolesByName("ocw", true).forEach(role ->
-                            guild.updateCommandPrivilegesById(gameServerCommand.getId(), CommandPrivilege.enable(role))
-                                    .queue());
+                    guild.getRolesByName("ocw", true).forEach(role -> {
+                        try {
+                            guild.updateCommandPrivileges(Map.of(gameServerCommand.getId(), List.of(CommandPrivilege.enable(role))))
+                                    .queue();
+                        } catch (Exception e) {
+                            log.error("Failed to update command privileges in server {} for command {}", guild.getId(), gameServerCommand.getName(), e);
+                        }
+                    });
                 });
     }
 }
