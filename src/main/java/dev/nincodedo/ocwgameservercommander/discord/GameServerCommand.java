@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.stereotype.Component;
 
@@ -36,13 +37,8 @@ public class GameServerCommand {
     }
 
     private void startGameServer(SlashCommandInteractionEvent event) {
-        var gameOption = event.getOption("game");
-        if (gameOption == null) {
-            event.reply("???").setEphemeral(true).queue();
-            return;
-        }
         event.deferReply().queue();
-        var gameServerName = gameOption.getAsString();
+        var gameServerName = event.getOption("game", OptionMapping::getAsString);
         var result = gameServerManager.startGameServer(gameServerName);
         switch (result) {
             case STARTING -> event.getHook().editOriginalFormat("Starting %s...", gameServerName).queue(message -> {
@@ -66,25 +62,21 @@ public class GameServerCommand {
     }
 
     private void fixGameServer(SlashCommandInteractionEvent event) {
-        var gameOption = event.getOption("game");
-        if (gameOption == null) {
-            event.reply("???").setEphemeral(true).queue();
-            return;
-        }
-        var game = gameOption.getAsString();
+        var gameServerName = event.getOption("game", OptionMapping::getAsString);
         event.reply("Nincodedo has been notified and will look into the issue ASAP.").setEphemeral(true).queue();
-        gameServerService.findGameServerByName(game).ifPresentOrElse(gameServer -> {
-            event.getJDA().openPrivateChannelById(constants.nincodedoUserId()).complete()
-                    .sendMessageFormat("Game server %s is reported as broken by %s.", gameServer.getName(), event.getUser()
-                            .getName())
-                    .setActionRow(
-                            Button.danger(String.format("gsc-restart-%s", gameServer.getId()), String.format("Restart %s?", gameServer.getName())),
-                            Button.danger(String.format("gsc-stop-%s", gameServer.getId()), String.format("Stop %s?", gameServer.getName())),
-                            Button.secondary("gsc-ignore", "Disable fix alerts"))
-                    .queue();
-        }, () -> event.getHook()
-                .editOriginalFormat("Could not find server named %s.", gameOption.getAsString())
-                .queue());
+        gameServerService.findGameServerByName(gameServerName)
+                .ifPresentOrElse(gameServer -> event.getJDA()
+                        .openPrivateChannelById(constants.nincodedoUserId())
+                        .complete()
+                        .sendMessageFormat("Game server %s is reported as broken by %s.", gameServer.getName(), event.getUser()
+                                .getName())
+                        .setActionRow(
+                                Button.danger(String.format("gsc-restart-%s", gameServer.getId()), String.format("Restart %s?", gameServer.getName())),
+                                Button.danger(String.format("gsc-stop-%s", gameServer.getId()), String.format("Stop %s?", gameServer.getName())),
+                                Button.secondary("gsc-ignore", "Disable fix alerts"))
+                        .queue(), () -> event.getHook()
+                        .editOriginalFormat("Could not find server named %s.", gameServerName)
+                        .queue());
     }
 
     private void listGameServers(SlashCommandInteractionEvent event) {
