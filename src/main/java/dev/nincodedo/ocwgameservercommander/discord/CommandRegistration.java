@@ -7,12 +7,10 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -42,16 +40,9 @@ public class CommandRegistration extends ListenerAdapter {
                                     new SubcommandData("list", "List available game servers."),
                                     new SubcommandData("fix", "Mark a game server as broken and need fixing.")
                                             .addOption(OptionType.STRING, "game", "Name of the game server that needs fixing.", true, true)
-                            )).setDefaultEnabled(false);
-                    var gameServerCommand = guild.upsertCommand(gameServerCommandData).complete();
-                    guild.getRolesByName("ocw", true).forEach(role -> {
-                        try {
-                            guild.updateCommandPrivileges(Map.of(gameServerCommand.getId(), List.of(CommandPrivilege.enable(role))))
-                                    .queue();
-                        } catch (Exception e) {
-                            log.error("Failed to update command privileges in server {} for command {}", guild.getId(), gameServerCommand.getName(), e);
-                        }
-                    });
+                            ));
+                    var adminServerCommand = Commands.slash("admin", "Admin commands for game servers.");
+                    guild.updateCommands().addCommands(gameServerCommandData, adminServerCommand).queue();
                 });
     }
 }
