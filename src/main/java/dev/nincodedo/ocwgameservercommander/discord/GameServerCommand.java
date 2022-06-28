@@ -6,6 +6,7 @@ import dev.nincodedo.ocwgameservercommander.GameServerService;
 import dev.nincodedo.ocwgameservercommander.config.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -45,11 +46,11 @@ public class GameServerCommand {
                 var started = gameServerManager.waitForGameServerStart(gameServerName);
                 if (started) {
                     message.editMessageFormat("%s has started.", gameServerName).queue();
-                    message.addReaction("\u2705").queue();
+                    message.addReaction(Emoji.fromFormatted("\u2705")).queue();
                 } else {
                     message.editMessageFormat("%s failed to start. Use '/games fix' to notify Nincodedo.", gameServerName)
                             .queue();
-                    message.addReaction("\u274C").queue();
+                    message.addReaction(Emoji.fromFormatted("\u274C")).queue();
                 }
             });
             case ALREADY_STARTED -> event.getHook()

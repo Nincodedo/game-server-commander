@@ -4,6 +4,7 @@ import dev.nincodedo.ocwgameservercommander.config.Constants;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -40,8 +41,12 @@ public class CommandRegistration extends ListenerAdapter {
                                     new SubcommandData("list", "List available game servers."),
                                     new SubcommandData("fix", "Mark a game server as broken and need fixing.")
                                             .addOption(OptionType.STRING, "game", "Name of the game server that needs fixing.", true, true)
-                            ));
-                    var adminServerCommand = Commands.slash("admin", "Admin commands for game servers.");
+                            ))
+                            .setGuildOnly(true)
+                            .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
+                    var adminServerCommand = Commands.slash("admin", "Admin commands for game servers.")
+                            .setGuildOnly(true)
+                            .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
                     guild.updateCommands().addCommands(gameServerCommandData, adminServerCommand).queue();
                 });
     }
