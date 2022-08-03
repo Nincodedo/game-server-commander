@@ -6,7 +6,7 @@ COPY src ./src
 COPY .git ./.git
 RUN mvn package -P git-commit
 
-FROM openjdk:17-jdk-slim-buster
+FROM openjdk:18-jdk-slim-buster
 
 LABEL maintainer="Nincodedo"
 
