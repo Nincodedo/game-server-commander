@@ -11,11 +11,9 @@ FROM openjdk:17-jdk-slim-buster
 LABEL maintainer="Nincodedo"
 
 RUN mkdir /app
-RUN groupadd -g 1000 -r gsc && useradd -r -s /bin/false -u 1000 -g gsc gsc
 WORKDIR /app
-COPY --chown=gsc:gsc --from=build target/ocw-game-server-commander*.jar /app/gsc.jar
+COPY --from=build target/ocw-game-server-commander*.jar /app/gsc.jar
 COPY DockerHealthCheck.java /app
-USER gsc
 HEALTHCHECK CMD java /app/DockerHealthCheck.java 2>&1 || exit 1
 EXPOSE 8080
 ENTRYPOINT ["java"]
