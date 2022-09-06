@@ -32,7 +32,7 @@ public class CommandRegistration extends ListenerAdapter {
                 .getShardManager()
                 .getGuilds()
                 .stream()
-                .filter(guild -> guild.getOwnerId().equals(constants.nincodedoUserId()))
+                .filter(guild -> guild.getOwnerId().equals(constants.gameServerAdminId()))
                 .forEach(guild -> {
                     var gameServerCommandData = Commands.slash("games", "Main game server command.")
                             .addSubcommands(List.of(

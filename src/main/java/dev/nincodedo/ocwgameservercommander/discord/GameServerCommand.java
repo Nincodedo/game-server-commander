@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GameServerCommand {
+public class GameServerCommand implements Command {
 
     private final GameServerService gameServerService;
     private final GameServerManager gameServerManager;
@@ -67,7 +67,7 @@ public class GameServerCommand {
         event.reply("Nincodedo has been notified and will look into the issue ASAP.").setEphemeral(true).queue();
         gameServerService.findGameServerByName(gameServerName)
                 .ifPresentOrElse(gameServer -> event.getJDA()
-                        .openPrivateChannelById(constants.nincodedoUserId())
+                        .openPrivateChannelById(constants.gameServerAdminId())
                         .complete()
                         .sendMessageFormat("Game server %s is reported as broken by %s.", gameServer.getName(), event.getUser()
                                 .getName())
@@ -90,7 +90,7 @@ public class GameServerCommand {
         } else {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("OCW Game Servers");
-            gameServers.forEach(gameServer -> embedBuilder.addField(gameServer.getGameTitle(), gameServer.getGameDescription(), false));
+            gameServers.forEach(gameServer -> embedBuilder.addField(gameServer.getGameTitle(), gameServer.getGameDescription(), true));
             event.getHook().editOriginal(new MessageBuilder(embedBuilder).build()).queue();
         }
     }
@@ -106,6 +106,9 @@ public class GameServerCommand {
     }
 
     public void executeButtonPress(ButtonInteractionEvent event, String buttonId) {
+        if (!event.getUser().getId().equals(constants.gameServerAdminId())) {
+            return;
+        }
         var buttonAction = getButtonAction(buttonId);
         switch (buttonAction.actionName()) {
             case "restart" -> {
@@ -134,6 +137,11 @@ public class GameServerCommand {
         String actionName = button.length >= 2 ? button[1] : null;
         String value = button.length >= 3 ? button[2] : null;
         return new ButtonAction(prefix, actionName, value);
+    }
+
+    @Override
+    public String getName() {
+        return "games";
     }
 
     public record ButtonAction(String prefix, String actionName, String value) {
