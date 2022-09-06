@@ -24,13 +24,17 @@ public class ContainerUtil {
     }
 
     public @NotNull List<Container> getGameContainerByName(String gameServerName) {
-        var gameContainer = dockerClient.listContainersCmd()
+        var gameContainerList = dockerClient.listContainersCmd()
                 .withShowAll(true)
                 .exec()
                 .stream()
                 .filter(container -> gameServerName.equalsIgnoreCase(container.getLabels()
                         .get(GSC_NAME_KEY)))
-                .toList().get(0);
+                .toList();
+        if (gameContainerList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        var gameContainer = gameContainerList.get(0);
         var containerList = new ArrayList<Container>();
         if (gameContainer.getLabels().containsKey(GCS_GROUP_KEY)) {
             var groupName = gameContainer.getLabels().get(GCS_GROUP_KEY);
