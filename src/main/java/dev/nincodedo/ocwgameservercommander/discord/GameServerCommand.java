@@ -5,13 +5,14 @@ import dev.nincodedo.ocwgameservercommander.GameServerManager;
 import dev.nincodedo.ocwgameservercommander.GameServerService;
 import dev.nincodedo.ocwgameservercommander.config.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -84,14 +85,14 @@ public class GameServerCommand implements Command {
         event.deferReply().queue();
         var gameServers = gameServerService.findAll();
         if (gameServers.isEmpty()) {
-            MessageBuilder messageBuilder = new MessageBuilder();
-            messageBuilder.append("No game servers found. Contact Nin.");
+            MessageEditBuilder messageBuilder = new MessageEditBuilder();
+            messageBuilder.setContent("No game servers found. Contact Nin.");
             event.getHook().editOriginal(messageBuilder.build()).queue();
         } else {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("OCW Game Servers");
             gameServers.forEach(gameServer -> embedBuilder.addField(gameServer.getGameTitle(), gameServer.getGameDescription(), true));
-            event.getHook().editOriginal(new MessageBuilder(embedBuilder).build()).queue();
+            event.getHook().editOriginal(new MessageEditBuilder().setEmbeds(embedBuilder.build()).build()).queue();
         }
     }
 
