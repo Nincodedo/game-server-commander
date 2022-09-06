@@ -1,0 +1,17 @@
+version: "3"
+services:
+  ocw-game-server-commander:
+    build:
+      context: .
+    container_name: ocw-game-server-commander
+    env_file:
+      - docker.env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    image: ghcr.io/nincodedo/game-server-commander:latest
+    labels:
+      com.centurylinklabs.watchtower.enable: false
+    ports:
+      - "8085:8080/tcp"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
