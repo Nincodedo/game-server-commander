@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import org.springframework.stereotype.Component;
 
@@ -49,13 +48,13 @@ public class GameServerCommand implements Command {
                     message.editMessageFormat("%s has started.", gameServerName).queue();
                     message.addReaction(Emoji.fromFormatted("\u2705")).queue();
                 } else {
-                    message.editMessageFormat("%s failed to start. Use '/games fix' to notify Nincodedo.", gameServerName)
+                    message.editMessageFormat("%s failed to start. Use '/games fix' to notify %s.", gameServerName, constants.gameServerAdminName())
                             .queue();
                     message.addReaction(Emoji.fromFormatted("\u274C")).queue();
                 }
             });
             case ALREADY_STARTED -> event.getHook()
-                    .editOriginalFormat("%s is already started. If you think this server may be broken, use '/games fix' to notify Nincodedo.", gameServerName)
+                    .editOriginalFormat("%s is already started. If you think this server may be broken, use '/games fix' to notify %s.", gameServerName, constants.gameServerAdminName())
                     .queue();
             case NOT_FOUND ->
                     event.getHook().editOriginalFormat("Could not find server named %s.", gameServerName).queue();
@@ -65,7 +64,9 @@ public class GameServerCommand implements Command {
 
     private void fixGameServer(SlashCommandInteractionEvent event) {
         var gameServerName = event.getOption("game", OptionMapping::getAsString);
-        event.reply("Nincodedo has been notified and will look into the issue ASAP.").setEphemeral(true).queue();
+        event.replyFormat("%s has been notified and will look into the issue ASAP.", constants.gameServerAdminName())
+                .setEphemeral(true)
+                .queue();
         gameServerService.findGameServerByName(gameServerName)
                 .ifPresentOrElse(gameServer -> event.getJDA()
                         .openPrivateChannelById(constants.gameServerAdminId())
@@ -85,9 +86,9 @@ public class GameServerCommand implements Command {
         event.deferReply().queue();
         var gameServers = gameServerService.findAll();
         if (gameServers.isEmpty()) {
-            MessageEditBuilder messageBuilder = new MessageEditBuilder();
-            messageBuilder.setContent("No game servers found. Contact Nin.");
-            event.getHook().editOriginal(messageBuilder.build()).queue();
+            event.getHook()
+                    .editOriginalFormat("No game servers found. Contact %s.", constants.gameServerAdminName())
+                    .queue();
         } else {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("OCW Game Servers");
