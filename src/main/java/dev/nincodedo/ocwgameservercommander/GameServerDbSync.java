@@ -35,8 +35,10 @@ public class GameServerDbSync {
     }
 
     private void addNewGameServer(String gameName) {
-        var gameContainerLabels = containerUtil.getMainGameContainerByName(gameName).getLabels();
+        var container = containerUtil.getMainGameContainerByName(gameName);
+        var gameContainerLabels = container.getLabels();
         GameServer gameServer = new GameServer();
+        gameServer.setContainerId(container.getId());
         gameServer.setName(gameContainerLabels.get(ContainerUtil.GSC_NAME_KEY));
         gameServer.setGame(gameContainerLabels.get(ContainerUtil.GSC_GAME_KEY));
         gameServer.setDescription(gameContainerLabels.get(ContainerUtil.GSC_DESCRIPTION_KEY));
@@ -57,11 +59,12 @@ public class GameServerDbSync {
     }
 
     private boolean allContainersOnline(List<Container> containers) {
+        int count = 0;
         for (var container : containers) {
-            if (container.getState().equals("exited")) {
-                return false;
+            if (container.getState().equals("running")) {
+                count++;
             }
         }
-        return true;
+        return count == containers.size();
     }
 }
