@@ -16,16 +16,9 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class AppConfiguration {
-    private final String discordToken;
-    private final String dockerHost;
-
-    public AppConfiguration(@Value("${discordToken}") String discordToken, @Value("${dockerHost}") String dockerHost) {
-        this.discordToken = discordToken;
-        this.dockerHost = dockerHost;
-    }
 
     @Bean
-    public ShardManager shardManager(CommandListener commandListener, CommandRegistration commandRegistration) {
+    public ShardManager shardManager(CommandListener commandListener, CommandRegistration commandRegistration, @Value("${discordToken}") String discordToken) {
         return DefaultShardManagerBuilder.createLight(discordToken)
                 .addEventListeners(commandListener, commandRegistration)
                 .setShardsTotal(-1)
@@ -33,7 +26,7 @@ public class AppConfiguration {
     }
 
     @Bean
-    public DockerClient dockerClient() {
+    public DockerClient dockerClient(@Value("${dockerHost}") String dockerHost) {
         var config = DefaultDockerClientConfig
                 .createDefaultConfigBuilder()
                 .withDockerHost(dockerHost)
