@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class ActivityUpdater {
 
@@ -18,7 +20,7 @@ public class ActivityUpdater {
         updateActivity();
     }
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
     private void checkForUpdatedActivity() {
         if (gameServerService.isRecentChangesMade()) {
             updateActivity();
@@ -26,7 +28,7 @@ public class ActivityUpdater {
         }
     }
 
-    @Scheduled(cron = "0 */15 * * * *")
+    @Scheduled(fixedRate = 15, timeUnit = TimeUnit.MINUTES)
     private void updateActivity() {
         int serverCount = gameServerService.getOnlineGameServerCount();
         if (serverCount > 0) {

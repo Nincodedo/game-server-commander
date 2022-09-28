@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -20,7 +21,7 @@ public class GameServerDbSync {
         addNewGameServers();
     }
 
-    @Scheduled(cron = "0 0 */6 * * *")
+    @Scheduled(fixedRate = 6, timeUnit = TimeUnit.HOURS)
     public void addNewGameServers() {
         var gameContainers = containerUtil.getAllGameServerContainers()
                 .stream()
@@ -46,7 +47,7 @@ public class GameServerDbSync {
         gameServerService.save(gameServer);
     }
 
-    @Scheduled(cron = "0 */15 * * * *")
+    @Scheduled(fixedRate = 15, timeUnit = TimeUnit.MINUTES)
     public void updateStatuses() {
         gameServerService.findAll().forEach(gameServer -> {
             var containers = containerUtil.getGameContainerByName(gameServer.getName());
