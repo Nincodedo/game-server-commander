@@ -68,7 +68,7 @@ public class ContainerUtil {
 
     public void startContainers(List<Container> gameContainers) {
         log.trace("Starting potentially {} container(s)", gameContainers.size());
-        gameContainers.stream().filter(container -> container.getState().equals("exited"))
+        gameContainers.stream().filter(container -> !container.getState().equals("running"))
                 .forEach(container -> {
                     log.trace("Starting container {}", container.getId());
                     startContainer(container);
@@ -76,7 +76,7 @@ public class ContainerUtil {
     }
 
     public void stopContainers(List<Container> gameContainers) {
-        gameContainers.stream().filter(container -> !container.getState().equals("exited"))
+        gameContainers.stream().filter(container -> container.getState().equals("running"))
                 .forEach(container -> {
                     log.trace("Stopping container {}", container.getId());
                     stopContainer(container);

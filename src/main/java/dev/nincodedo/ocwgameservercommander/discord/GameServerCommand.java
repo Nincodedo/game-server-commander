@@ -10,9 +10,12 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
 
 @Component
 public class GameServerCommand implements Command {
@@ -38,26 +41,29 @@ public class GameServerCommand implements Command {
     }
 
     private void startGameServer(SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
         var gameServerName = event.getOption("game", OptionMapping::getAsString);
         var result = gameServerManager.startGameServer(gameServerName);
         switch (result) {
-            case STARTING -> event.getHook().editOriginalFormat("Starting %s...", gameServerName).queue(message -> {
-                var started = gameServerManager.waitForGameServerStart(gameServerName);
-                if (started) {
-                    message.editMessageFormat("%s has started.", gameServerName).queue();
-                    message.addReaction(Emoji.fromFormatted("\u2705")).queue();
-                } else {
-                    message.editMessageFormat("%s failed to start. Use '/games fix' to notify %s.", gameServerName, constants.gameServerAdminName())
+            case STARTING -> {
+                event.deferReply().queue();
+                event.getHook().editOriginalFormat("Starting %s...", gameServerName).queue(message -> {
+                    var started = gameServerManager.waitForGameServerStart(gameServerName);
+                    if (started) {
+                        message.editMessageFormat("%s has started.", gameServerName).queue();
+                        message.addReaction(Emoji.fromFormatted("✅")).queue();
+                    } else {
+                        message.editMessageFormat("%s failed to start. Use '/games fix' to notify %s.", gameServerName, constants.gameServerAdminName())
+                                .queue();
+                        message.addReaction(Emoji.fromFormatted("❌")).queue();
+                    }
+                });
+            }
+            case ALREADY_STARTED ->
+                    event.replyFormat("%s is already started. If you think this server may be broken, use '/games fix' to notify %s.", gameServerName, constants.gameServerAdminName())
+                            .setEphemeral(true)
                             .queue();
-                    message.addReaction(Emoji.fromFormatted("\u274C")).queue();
-                }
-            });
-            case ALREADY_STARTED -> event.getHook()
-                    .editOriginalFormat("%s is already started. If you think this server may be broken, use '/games fix' to notify %s.", gameServerName, constants.gameServerAdminName())
-                    .queue();
             case NOT_FOUND ->
-                    event.getHook().editOriginalFormat("Could not find server named %s.", gameServerName).queue();
+                    event.replyFormat("Could not find server named %s.", gameServerName).setEphemeral(true).queue();
             default -> throw new IllegalStateException("Unexpected value: " + result);
         }
     }
@@ -73,23 +79,18 @@ public class GameServerCommand implements Command {
                         .complete()
                         .sendMessageFormat("Game server %s is reported as broken by %s.", gameServer.getName(), event.getUser()
                                 .getName())
-                        .setActionRow(
-                                Button.danger(String.format("gsc-restart-%s", gameServer.getId()), String.format("Restart %s?", gameServer.getName())),
-                                Button.danger(String.format("gsc-stop-%s", gameServer.getId()), String.format("Stop %s?", gameServer.getName())),
-                                Button.secondary("gsc-ignore", "Disable fix alerts"))
+                        .setActionRow(Button.danger(String.format("gsc-restart-%s", gameServer.getId()), String.format("Restart %s?", gameServer.getName())), Button.danger(String.format("gsc-stop-%s", gameServer.getId()), String.format("Stop %s?", gameServer.getName())), Button.secondary("gsc-ignore", "Disable fix alerts"))
                         .queue(), () -> event.getHook()
                         .editOriginalFormat("Could not find server named %s.", gameServerName)
                         .queue());
     }
 
     private void listGameServers(SlashCommandInteractionEvent event) {
-        event.deferReply().queue();
         var gameServers = gameServerService.findAll();
         if (gameServers.isEmpty()) {
-            event.getHook()
-                    .editOriginalFormat("No game servers found. Contact %s.", constants.gameServerAdminName())
-                    .queue();
+            event.replyFormat("No game servers found. Contact %s.", constants.gameServerAdminName()).setEphemeral(true).queue();
         } else {
+            event.deferReply().queue();
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setTitle("OCW Game Servers");
             gameServers.forEach(gameServer -> embedBuilder.addField(gameServer.getGameTitle(), gameServer.getGameDescription(), true));
@@ -101,8 +102,10 @@ public class GameServerCommand implements Command {
         if ("start".equals(event.getSubcommandName()) || "fix".equals(event.getSubcommandName())) {
             var gameServers = gameServerService.findAll();
             if (!gameServers.isEmpty()) {
-                var gameNameList = gameServers.stream().map(GameServer::getName).toList();
+                var gameNameList = gameServers.stream().map(GameServer::getName).limit(OptionData.MAX_CHOICES).toList();
                 event.replyChoiceStrings(gameNameList).queue();
+            } else {
+                event.replyChoiceStrings(Collections.emptyList()).queue();
             }
         }
     }
@@ -118,7 +121,7 @@ public class GameServerCommand implements Command {
                 gameServerService.findById(Long.valueOf(buttonAction.value())).ifPresentOrElse(gameServer -> {
                     event.editButton(event.getButton().asDisabled().withLabel("Restarting...")).queue();
                     gameServerManager.restartGameServer(gameServer);
-                }, () -> event.editButton(event.getButton().withLabel("Failed to restart")).queue());
+                }, () -> event.editButton(event.getButton().asDisabled().withLabel("Failed to restart")).queue());
             }
             case "stop" -> {
                 event.deferEdit().queue();
