@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.springframework.stereotype.Component;
 
 @Component
-public class AdminCommand implements Command{
+public class AdminCommand implements Command {
     @Override
     public String getName() {
         return "admin";

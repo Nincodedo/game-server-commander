@@ -88,7 +88,9 @@ public class GameServerCommand implements Command {
     private void listGameServers(SlashCommandInteractionEvent event) {
         var gameServers = gameServerService.findAll();
         if (gameServers.isEmpty()) {
-            event.replyFormat("No game servers found. Contact %s.", constants.gameServerAdminName()).setEphemeral(true).queue();
+            event.replyFormat("No game servers found. Contact %s.", constants.gameServerAdminName())
+                    .setEphemeral(true)
+                    .queue();
         } else {
             event.deferReply().queue();
             EmbedBuilder embedBuilder = new EmbedBuilder();

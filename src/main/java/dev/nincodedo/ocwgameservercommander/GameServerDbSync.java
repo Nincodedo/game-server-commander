@@ -46,9 +46,9 @@ public class GameServerDbSync {
                 addNewGameServer(gameName);
             }
         }
-        for(var gameServer : allGameServers){
+        for (var gameServer : allGameServers) {
             var optionalContainer = containerUtil.getContainerById(gameServer.getContainerId());
-            if(optionalContainer.isEmpty()){
+            if (optionalContainer.isEmpty()) {
                 log.trace("Game server {} in DB does not exist as a container with id {}, removing", gameServer, gameServer.getContainerId());
                 gameServerService.delete(gameServer);
             }

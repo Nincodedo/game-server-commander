@@ -73,7 +73,7 @@ public class GameServerManager {
         CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
             while (true) {
                 var status = containerUtil.getMainGameContainerByName(gameServerName).getStatus().toLowerCase();
-                if(status.contains("healthy") || (!status.contains("health:") && status.contains("up"))) {
+                if (status.contains("healthy") || (!status.contains("health:") && status.contains("up"))) {
                     return true;
                 }
                 try {
