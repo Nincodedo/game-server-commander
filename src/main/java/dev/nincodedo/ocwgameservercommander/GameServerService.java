@@ -43,4 +43,8 @@ public class GameServerService {
     public void acknowledgeRecentChangesMade() {
         recentChangesMade = false;
     }
+
+    public void delete(GameServer gameServer) {
+        gameServerRepository.delete(gameServer);
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -103,5 +104,14 @@ public class ContainerUtil {
                 .filter(container -> gameName.equalsIgnoreCase(container.getLabels()
                         .get(GSC_NAME_KEY)))
                 .toList().get(0);
+    }
+
+    public Optional<Container> getContainerById(String containerId) {
+        return dockerClient.listContainersCmd()
+                .withShowAll(true)
+                .exec()
+                .stream()
+                .filter(container -> container.getId().equals(containerId))
+                .findFirst();
     }
 }
