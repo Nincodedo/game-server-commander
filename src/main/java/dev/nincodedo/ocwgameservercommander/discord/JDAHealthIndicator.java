@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.Status;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -23,24 +22,18 @@ public class JDAHealthIndicator implements HealthIndicator {
         var shardStatuses = shardManager.getStatuses();
         var totalShardCount = shardStatuses.values().size();
         var connectedShardsCount = getConnectedShardsCount(shardStatuses);
-        if (totalShardCount == connectedShardsCount) {
-            return Health.up().build();
-        } else if (connectedShardsCount > 0) {
-            return Health.up()
-                    .status(new Status("Partial service", String.format("%s of %s shards connected", connectedShardsCount, totalShardCount)))
-                    .build();
+        Health.Builder healthBuilder;
+        if (connectedShardsCount > 0) {
+            healthBuilder = Health.up();
         } else {
-            return Health.down().build();
+            healthBuilder = Health.down();
         }
+        return healthBuilder.withDetail("connectedShardCount", connectedShardsCount)
+                .withDetail("totalShardCount", totalShardCount)
+                .build();
     }
 
     private int getConnectedShardsCount(Map<JDA, JDA.Status> shardStatuses) {
-        int count = 0;
-        for (var status : shardStatuses.values()) {
-            if (status == JDA.Status.CONNECTED) {
-                count++;
-            }
-        }
-        return count;
+        return (int) shardStatuses.values().stream().filter(status -> status == JDA.Status.CONNECTED).count();
     }
 }
