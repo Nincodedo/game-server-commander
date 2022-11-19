@@ -63,6 +63,7 @@ public class GameServerDbSync {
         gameServer.setName(gameContainerLabels.get(ContainerUtil.GSC_NAME_KEY));
         gameServer.setGame(gameContainerLabels.get(ContainerUtil.GSC_GAME_KEY));
         gameServer.setDescription(gameContainerLabels.get(ContainerUtil.GSC_DESCRIPTION_KEY));
+        gameServer.setConnectionInfo(gameContainerLabels.get(ContainerUtil.GSC_CONNECTION_INFO_KEY));
         gameServer.setCreatedBy("GSC");
         gameServerService.save(gameServer);
         log.trace("Added new game server: {}", gameServer);

@@ -17,6 +17,7 @@ public class ContainerUtil {
     public static final String GSC_NAME_KEY = "dev.nincodedo.gameservercommander.name";
     public static final String GSC_GAME_KEY = "dev.nincodedo.gameservercommander.game";
     public static final String GSC_DESCRIPTION_KEY = "dev.nincodedo.gameservercommander.description";
+    public static final String GSC_CONNECTION_INFO_KEY = "dev.nincodedo.gameservercommander.connection_info";
 
     private final DockerClient dockerClient;
 
