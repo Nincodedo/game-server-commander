@@ -37,7 +37,22 @@ public class GameServerCommand implements Command {
             listGameServers(event);
         } else if ("fix".equals(event.getSubcommandName())) {
             fixGameServer(event);
+        } else if ("suggest".equals(event.getSubcommandName())) {
+            suggestAGame(event);
         }
+    }
+
+    private void suggestAGame(SlashCommandInteractionEvent event) {
+        var gameName = event.getOption("game", OptionMapping::getAsString);
+        event.replyFormat("%s has been notified and will look into adding %s soon™.", constants.gameServerAdminName(), gameName)
+                .setEphemeral(true)
+                .queue();
+        event.getJDA()
+                .openPrivateChannelById(constants.gameServerAdminId())
+                .complete()
+                .sendMessageFormat("Game %s has been suggested by %s in %s.", gameName, event.getMember()
+                        .getEffectiveName(), event.getGuild().getName())
+                .queue();
     }
 
     private void startGameServer(SlashCommandInteractionEvent event) {

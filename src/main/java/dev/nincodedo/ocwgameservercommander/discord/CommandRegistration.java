@@ -40,7 +40,9 @@ public class CommandRegistration extends ListenerAdapter {
                                             .addOption(OptionType.STRING, "game", "Name of the game server you want to start.", true, true),
                                     new SubcommandData("list", "List available game servers."),
                                     new SubcommandData("fix", "Mark a game server as broken and need fixing.")
-                                            .addOption(OptionType.STRING, "game", "Name of the game server that needs fixing.", true, true)
+                                            .addOption(OptionType.STRING, "game", "Name of the game server that needs fixing.", true, true),
+                                    new SubcommandData("suggest", "Suggest a game that should be added.")
+                                            .addOption(OptionType.STRING, "game", "Name of the game you're suggesting.", true)
                             ))
                             .setGuildOnly(true)
                             .setDefaultPermissions(DefaultMemberPermissions.DISABLED);
