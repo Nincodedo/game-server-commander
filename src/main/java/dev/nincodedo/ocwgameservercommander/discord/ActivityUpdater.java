@@ -20,7 +20,7 @@ public class ActivityUpdater {
         updateActivity();
     }
 
-    @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
     private void checkForUpdatedActivity() {
         if (gameServerService.isRecentChangesMade()) {
             updateActivity();
@@ -28,7 +28,7 @@ public class ActivityUpdater {
         }
     }
 
-    @Scheduled(fixedRate = 15, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 15, timeUnit = TimeUnit.MINUTES)
     private void updateActivity() {
         int serverCount = gameServerService.getOnlineGameServerCount();
         if (serverCount > 0) {

@@ -29,10 +29,10 @@ public class GameServerDbSync {
         var totalServers = total == 1 ? "server" : "servers";
         var online = gameServerService.getOnlineGameServerCount();
         var onlineServers = online == 1 ? "server" : "servers";
-        log.trace("Initial startup complete, {} {} total, {} {} online", total, totalServers, online, onlineServers);
+        log.info("Initial startup complete, {} {} total, {} {} online", total, totalServers, online, onlineServers);
     }
 
-    @Scheduled(fixedRate = 6, timeUnit = TimeUnit.HOURS)
+    @Scheduled(fixedDelay = 6, timeUnit = TimeUnit.HOURS)
     public void addNewGameServers() {
         var gameContainers = containerUtil.getAllGameServerContainers()
                 .stream()
@@ -42,14 +42,14 @@ public class GameServerDbSync {
         var currentGameList = allGameServers.stream().map(GameServer::getName).toList();
         for (var gameName : gameContainers.keySet()) {
             if (!currentGameList.contains(gameName)) {
-                log.trace("Found new game server for {}, adding", gameName);
+                log.info("Found new game server for {}, adding", gameName);
                 addNewGameServer(gameName);
             }
         }
         for (var gameServer : allGameServers) {
             var optionalContainer = containerUtil.getContainerById(gameServer.getContainerId());
             if (optionalContainer.isEmpty()) {
-                log.trace("Game server {} in DB does not exist as a container with id {}, removing", gameServer, gameServer.getContainerId());
+                log.info("Game server {} in DB does not exist as a container with id {}, removing", gameServer, gameServer.getContainerId());
                 gameServerService.delete(gameServer);
             }
         }
@@ -68,7 +68,7 @@ public class GameServerDbSync {
         log.trace("Added new game server: {}", gameServer);
     }
 
-    @Scheduled(fixedRate = 15, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 15, timeUnit = TimeUnit.MINUTES)
     public void updateStatuses() {
         gameServerService.findAll().forEach(gameServer -> {
             var containers = containerUtil.getGameContainerByName(gameServer.getName());
