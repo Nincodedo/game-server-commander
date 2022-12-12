@@ -1,4 +1,4 @@
-FROM maven:3.8.6-eclipse-temurin-17 AS build
+FROM maven:3.8.6-eclipse-temurin-19 AS build
 COPY pom.xml .
 COPY .mvn ./.mvn
 RUN mvn -B dependency:resolve
@@ -6,7 +6,7 @@ COPY src ./src
 COPY .git ./.git
 RUN mvn package -P git-commit
 
-FROM openjdk:17-jdk-slim-buster
+FROM eclipse-temurin:19-jre-focal
 
 LABEL maintainer="Nincodedo"
 
