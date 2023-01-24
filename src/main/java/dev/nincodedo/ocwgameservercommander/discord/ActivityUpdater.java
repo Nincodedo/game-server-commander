@@ -1,6 +1,6 @@
 package dev.nincodedo.ocwgameservercommander.discord;
 
-import dev.nincodedo.ocwgameservercommander.GameServerService;
+import dev.nincodedo.ocwgameservercommander.gameserver.GameServerService;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.springframework.scheduling.annotation.Scheduled;

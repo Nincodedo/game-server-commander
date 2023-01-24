@@ -1,4 +1,4 @@
-package dev.nincodedo.ocwgameservercommander;
+package dev.nincodedo.ocwgameservercommander.gameserver;
 
 import com.github.dockerjava.api.model.Container;
 import dev.nincodedo.ocwgameservercommander.common.ContainerUtil;

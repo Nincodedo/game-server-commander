@@ -1,8 +1,8 @@
 package dev.nincodedo.ocwgameservercommander.discord;
 
-import dev.nincodedo.ocwgameservercommander.GameServer;
-import dev.nincodedo.ocwgameservercommander.GameServerManager;
-import dev.nincodedo.ocwgameservercommander.GameServerService;
+import dev.nincodedo.ocwgameservercommander.gameserver.GameServer;
+import dev.nincodedo.ocwgameservercommander.gameserver.GameServerManager;
+import dev.nincodedo.ocwgameservercommander.gameserver.GameServerService;
 import dev.nincodedo.ocwgameservercommander.config.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 
 @Component
 public class GameServerCommand implements Command {
@@ -39,6 +40,32 @@ public class GameServerCommand implements Command {
             fixGameServer(event);
         } else if ("suggest".equals(event.getSubcommandName())) {
             suggestAGame(event);
+        } else if ("online".equals(event.getSubcommandName())) {
+            listOnlineGameServers(event);
+        }
+    }
+
+    private void listOnlineGameServers(SlashCommandInteractionEvent event) {
+        var onlineServers = gameServerService.findAll().stream().filter(GameServer::isOnline).toList();
+        listServers(event, onlineServers);
+    }
+
+    private void listGameServers(SlashCommandInteractionEvent event) {
+        var allGameServers = gameServerService.findAll();
+        listServers(event, allGameServers);
+    }
+
+    private void listServers(SlashCommandInteractionEvent event, List<GameServer> servers) {
+        if (servers.isEmpty()) {
+            event.replyFormat("No game servers found. Contact %s if you think this is a mistake.", constants.gameServerAdminName())
+                    .setEphemeral(true)
+                    .queue();
+        } else {
+            event.deferReply().queue();
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("OCW Game Servers");
+            servers.forEach(gameServer -> embedBuilder.addField(gameServer.getGameTitle(), gameServer.getGameDescription(), true));
+            event.getHook().editOriginal(new MessageEditBuilder().setEmbeds(embedBuilder.build()).build()).queue();
         }
     }
 
@@ -98,21 +125,6 @@ public class GameServerCommand implements Command {
                         .queue(), () -> event.getHook()
                         .editOriginalFormat("Could not find server named %s.", gameServerName)
                         .queue());
-    }
-
-    private void listGameServers(SlashCommandInteractionEvent event) {
-        var gameServers = gameServerService.findAll();
-        if (gameServers.isEmpty()) {
-            event.replyFormat("No game servers found. Contact %s.", constants.gameServerAdminName())
-                    .setEphemeral(true)
-                    .queue();
-        } else {
-            event.deferReply().queue();
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle("OCW Game Servers");
-            gameServers.forEach(gameServer -> embedBuilder.addField(gameServer.getGameTitle(), gameServer.getGameDescription(), true));
-            event.getHook().editOriginal(new MessageEditBuilder().setEmbeds(embedBuilder.build()).build()).queue();
-        }
     }
 
     public void executeAutoComplete(CommandAutoCompleteInteractionEvent event) {

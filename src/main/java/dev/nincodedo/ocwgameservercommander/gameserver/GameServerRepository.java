@@ -1,4 +1,4 @@
-package dev.nincodedo.ocwgameservercommander;
+package dev.nincodedo.ocwgameservercommander.gameserver;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.repository.CrudRepository;

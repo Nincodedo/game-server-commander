@@ -1,4 +1,4 @@
-package dev.nincodedo.ocwgameservercommander;
+package dev.nincodedo.ocwgameservercommander.gameserver;
 
 import lombok.Getter;
 import lombok.Setter;

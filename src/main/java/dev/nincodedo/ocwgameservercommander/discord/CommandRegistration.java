@@ -38,7 +38,8 @@ public class CommandRegistration extends ListenerAdapter {
                             .addSubcommands(List.of(
                                     new SubcommandData("start", "Start a game server.")
                                             .addOption(OptionType.STRING, "game", "Name of the game server you want to start.", true, true),
-                                    new SubcommandData("list", "List available game servers."),
+                                    new SubcommandData("list", "List all game servers."),
+                                    new SubcommandData("online", "List online game servers."),
                                     new SubcommandData("fix", "Mark a game server as broken and need fixing.")
                                             .addOption(OptionType.STRING, "game", "Name of the game server that needs fixing.", true, true),
                                     new SubcommandData("suggest", "Suggest a game that should be added.")

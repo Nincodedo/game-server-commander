@@ -3,7 +3,7 @@ package dev.nincodedo.ocwgameservercommander.config;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.zerodep.ZerodepDockerHttpClient;
 import dev.nincodedo.ocwgameservercommander.discord.CommandListener;
 import dev.nincodedo.ocwgameservercommander.discord.CommandRegistration;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class AppConfiguration {
                 .createDefaultConfigBuilder()
                 .withDockerHost(dockerHost)
                 .build();
-        var client = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
+        var client = new ZerodepDockerHttpClient.Builder().dockerHost(config.getDockerHost())
                 .sslConfig(config.getSSLConfig())
                 .build();
         return DockerClientImpl.getInstance(config, client);

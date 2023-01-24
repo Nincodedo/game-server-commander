@@ -1,6 +1,6 @@
 package dev.nincodedo.ocwgameservercommander.api;
 
-import dev.nincodedo.ocwgameservercommander.GameServerService;
+import dev.nincodedo.ocwgameservercommander.gameserver.GameServerService;
 import dev.nincodedo.ocwgameservercommander.common.api.BaseResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
