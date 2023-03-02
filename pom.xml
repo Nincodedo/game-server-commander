@@ -16,7 +16,7 @@
     <properties>
         <java.version>19</java.version>
         <docker-java.version>3.2.14</docker-java.version>
-        <lombok-mapstruct.version>0.1.0</lombok-mapstruct.version>
+        <lombok-mapstruct.version>0.2.0</lombok-mapstruct.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <JDA.version>5.0.0-beta.2</JDA.version>
     </properties>
