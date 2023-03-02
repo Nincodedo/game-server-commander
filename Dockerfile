@@ -13,8 +13,7 @@ LABEL maintainer="Nincodedo"
 RUN mkdir /app
 WORKDIR /app
 COPY --from=build target/ocw-game-server-commander*.jar /app/gsc.jar
-COPY DockerHealthCheck.java /app
-HEALTHCHECK CMD java /app/DockerHealthCheck.java 2>&1 || exit 1
+HEALTHCHECK CMD curl http://localhost:8085/actuator/health || exit 1
 EXPOSE 8080
 ENTRYPOINT ["java"]
 CMD ["-Xss512k", "-Xmx256M", "--enable-preview", "-jar", "/app/gsc.jar"]
